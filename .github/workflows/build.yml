@@ -15,6 +15,11 @@ jobs:
           node-version: 20
       - run: npm version 1.0.${{ github.run_number }} --no-git-tag-version
       - run: npm install
+      - name: Icon erzeugen
+        continue-on-error: true
+        run: |
+          npm install --no-save sharp png-to-ico@2.1.8
+          node build/make-icon.js
       - run: npx electron-builder --win --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
