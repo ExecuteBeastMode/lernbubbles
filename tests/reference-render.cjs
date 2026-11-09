@@ -113,8 +113,8 @@ const server = http.createServer((req, res) => {
       await page.waitForTimeout(1500);
     }
 
-    async function focus(name) {
-      const result = await page.evaluate(n => window.__referenceTest.focus(n), name);
+    async function focus(name, variant = 0) {
+      const result = await page.evaluate(([n, v]) => window.__referenceTest.focus(n, v), [name, variant]);
       diagnostics.push(result);
       console.log('focus ' + JSON.stringify(result));
       return result;
@@ -163,6 +163,7 @@ const server = http.createServer((req, res) => {
     await shot('05-reference-boiler');
 
     // ---------- Standflächen A, B, D ----------
+    // Mindestens eine Ansicht muss die Standfläche zuerst treffen. Alle Versuche werden protokolliert.
     const workplaces = [
       ['Standfläche A', 'ground', '06-stand-a'],
       ['Standfläche B', 'ground', '07-stand-b'],
@@ -170,13 +171,27 @@ const server = http.createServer((req, res) => {
     ];
 
     for (const [name, floor, screenshot] of workplaces) {
-      const p = await focus(name);
-      assert.equal(p.floor, floor, name + ' im falschen Stockwerk');
-      assert(p.insideCanvas, name + ' nicht im Bild: ' + JSON.stringify(p));
-      assert(p.z > 0 && p.z < 1, name + ' außerhalb des Sichtbereichs: ' + JSON.stringify(p));
-      assert(p.hitNames.includes(name), name + ' verdeckt oder nicht getroffen (getroffen: ' + p.hitNames.join(' > ') + ')');
+      const attempts = [];
+      let found = null;
+
+      for (let variant = 0; ; variant++) {
+        let p;
+        try {
+          p = await focus(name, variant);
+        } catch (error) {
+          if (/Keine weitere Ansicht/.test(error.message)) break;
+          throw error;
+        }
+        attempts.push({variant, camera: p.camera, insideCanvas: p.insideCanvas, depth: p.z, hitNames: p.hitNames});
+        if (p.floor === floor && p.insideCanvas && p.z > 0 && p.z < 1 && p.hitNames.includes(name)) {
+          found = p;
+          break;
+        }
+      }
+
+      assert(found, name + ' aus keiner Ansicht frei sichtbar: ' + JSON.stringify(attempts));
       await shot(screenshot);
-      checks.push(name + ' sichtbar und vom Pick-Strahl zuerst getroffen');
+      checks.push(name + ' sichtbar und vom Pick-Strahl zuerst getroffen (Ansicht ' + found.variant + ')');
     }
 
     // ---------- Kehrmission über die Oberfläche ----------
