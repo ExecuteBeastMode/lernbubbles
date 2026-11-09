@@ -1,0 +1,1 @@
+window.mpTest2=function(){var ch=document.createElement("div");ch.id="mpChoice";ch.innerHTML="<div id=mpChoiceInner><h2>Willkommen</h2></div>";document.body.appendChild(ch);};
