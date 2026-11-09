@@ -21,11 +21,21 @@ jobs:
           npm install --no-save sharp png-to-ico@2.1.8
           node build/make-icon.js
       - name: Babylon-Simulationen bauen
-        run: npm run build:3d
+        run: |
+          New-Item -ItemType Directory -Force build/reference-screenshots | Out-Null
+          npm run build:3d 2>&1 | Tee-Object -FilePath build/reference-screenshots/build.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Chromium installieren
         run: npx playwright install chromium
       - name: Echten Referenzablauf pruefen
-        run: npm run test:reference
+        run: |
+          npm run test:reference 2>&1 | Tee-Object -FilePath build/reference-screenshots/browser.log
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Diagnose-Vorabbericht veroeffentlichen (kein Installer)
+        if: always()
+        run: node build/publish-reference.cjs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Echte Renderer-Screenshots sichern
         if: always()
         uses: actions/upload-artifact@v4
