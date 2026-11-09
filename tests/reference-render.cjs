@@ -163,6 +163,13 @@ const server = http.createServer((req, res) => {
     await shot('05-reference-boiler');
 
     // ---------- Standflächen A, B, D ----------
+    // Standfläche A und die Dachleiter liegen über dem Dach. Wählt die Mission einen Kehrweg,
+    // blendet sie das Dach aus (Schnittansicht); erst dann sind A und B von innen sichtbar.
+    await page.click('#m-brief');
+    await page.click('#m-A');
+    assert.match(await page.locator('#m-hint').innerText(), /Dach ist ausgeblendet/);
+    checks.push('Weg A blendet das Dach aus (Schnittansicht)');
+
     // Mindestens eine Ansicht muss die Standfläche zuerst treffen. Alle Versuche werden protokolliert.
     const workplaces = [
       ['Standfläche A', 'ground', '06-stand-a'],

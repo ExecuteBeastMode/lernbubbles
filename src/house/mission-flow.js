@@ -100,6 +100,22 @@ export function installMissionFlow(scene, camera) {
   let mission = null;
   let stage = 0;
 
+  // Schnittansicht: Standfläche A und die Dachleiter liegen über dem Dach. Von innen sind sie nur
+  // sichtbar, wenn die Dachflächen ausgeblendet sind. Das gilt, solange ein Kehrweg gewählt ist.
+  const roofMeshes = () => scene.meshes.filter(mesh => /^roof:/.test(mesh.name));
+  function setCutaway(on) {
+    for (const mesh of roofMeshes()) mesh.setEnabled(!on);
+  }
+
+  function chooseRoute(route) {
+    act(() => mission.route(route));
+
+    if (mission.state.route) {
+      setCutaway(true);
+      say('Weg ' + mission.state.route + ' gewählt. Das Dach ist ausgeblendet, damit die Standflächen sichtbar sind.');
+    }
+  }
+
   function fillTours() {
     $('m-tour').innerHTML = job.tours
       .map(tour => `<option value="${tour}">${tour}</option>`)
@@ -118,6 +134,7 @@ export function installMissionFlow(scene, camera) {
       approvedBrush: true
     });
 
+    setCutaway(false);
     rig.setDefect(scenario);
     rig.setLight(false);
     rig.open('D', false);
@@ -240,8 +257,8 @@ export function installMissionFlow(scene, camera) {
     draw();
   };
 
-  $('m-A').onclick = () => act(() => mission.route('A'));
-  $('m-B').onclick = () => act(() => mission.route('B'));
+  $('m-A').onclick = () => chooseRoute('A');
+  $('m-B').onclick = () => chooseRoute('B');
 
   $('m-access').onclick = () => {
     act(() => mission.inspectAccess());
@@ -288,7 +305,11 @@ export function installMissionFlow(scene, camera) {
     }
   };
 
-  $('m-finish').onclick = () => act(() => mission.finish());
+  $('m-finish').onclick = () => {
+    act(() => mission.finish());
+
+    if (mission.state.complete) setCutaway(false);
+  };
 
   $('m-measure').onclick = () => say(
     'M bleibt offen: Der Messauftrag braucht ein gültiges Protokoll aus dem Messmodul.'
@@ -317,6 +338,7 @@ export function installMissionFlow(scene, camera) {
     rig,
     get mission() { return mission; },
     dispose() {
+      setCutaway(false);
       rig.dispose();
       ui.remove();
     }

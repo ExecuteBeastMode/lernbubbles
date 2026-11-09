@@ -3,10 +3,12 @@ const GROUND = {name:'ground', height:2.9, eye:4.55, landingZ:3.999};
 
 // Standflächen des Kehrschornsteins. Jede Ansicht ist ein Kamerastandort relativ zum Ziel:
 // "back" = Abstand in +z, "side" = Versatz in x. Die Kamera bleibt auf Augenhöhe des Stockwerks,
-// weil main.js die Höhe pro Frame festlegt. Bei A liegt die Dachleiter bis in die Mitte der
-// Standfläche; daher mehrere Ansichten, von denen mindestens eine frei sein muss.
+// weil main.js die Höhe pro Frame festlegt. Bei A liegen die Dachleiter bis in die Mitte der
+// Standfläche und darunter die Plattform B; daher mehrere Ansichten, von denen mindestens eine
+// frei sein muss. Die Ansichten sind gegen die Rig-Geometrie gerechnet und setzen voraus, dass
+// die Mission das Dach ausgeblendet hat (Schnittansicht).
 export const WORKPLACES = {
- 'Standfläche A': {floor:GROUND, views:[{back:2, side:0}, {back:2, side:-1}, {back:2, side:1}, {back:2, side:-2}]},
+ 'Standfläche A': {floor:GROUND, views:[{back:2, side:1}, {back:2, side:-2}, {back:2, side:1.5}, {back:2, side:-1.5}, {back:2, side:2}]},
  'Standfläche B': {floor:GROUND, views:[{back:3, side:0}]},
  'Standfläche D': {floor:BASEMENT, views:[{back:1.6, side:0}]}
 };
