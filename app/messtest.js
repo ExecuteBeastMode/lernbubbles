@@ -1,0 +1,1 @@
+window.MPTEST={ok:true};
