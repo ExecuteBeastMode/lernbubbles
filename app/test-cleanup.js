@@ -1,1 +1,1 @@
-const x='Zeit';
+const x=()=>({a:1});
