@@ -1,0 +1,15 @@
+export function floorForTarget(name){
+ if(/^radiator:(living|kitchen|hall):valve$/.test(name))return {name:'ground',height:2.9,eye:4.55,landingZ:3.999};
+ if(/^(siphon:body|control:(power|mode|plus|minus)|controller:display|appliance:casing)$/.test(name))return {name:'basement',height:0,eye:1.65,landingZ:-.299};
+ throw Error('Keine geprüfte Stockwerkszuordnung für '+name);
+}
+export function createTestNavigation(scene,Vector3,Matrix,timeout=20000){
+ const camera=()=>scene.activeCamera;
+ const coordinates=v=>({x:v.x,y:v.y,z:v.z});
+ function target(name){const m=scene.getMeshByName(name);if(!m)throw Error('Mesh fehlt: '+name);m.computeWorldMatrix(true);return m}
+ function clearInput(){camera().cameraDirection.setAll(0);camera().cameraRotation.setAll(0)}
+ function frames(phase,predicate){return new Promise((resolve,reject)=>{let count=0,token,done=false;function finish(error){if(done)return;done=true;clearTimeout(timer);if(token)scene.onAfterRenderObservable.remove(token);error?reject(error):resolve()}const timer=setTimeout(()=>finish(Error('Keine stabile gerenderte Kameraposition: '+JSON.stringify({phase,frames:count,camera:coordinates(camera().position)}))),timeout);token=scene.onAfterRenderObservable.add(()=>{count++;try{if(count>=2&&predicate())finish()}catch(error){finish(error)}})})}
+ function project(name){const m=target(name),p=m.getBoundingInfo().boundingBox.centerWorld,engine=scene.getEngine(),rect=engine.getRenderingCanvas().getBoundingClientRect(),projected=Vector3.Project(p,Matrix.Identity(),scene.getTransformMatrix(),camera().viewport.toGlobal(engine.getRenderWidth(),engine.getRenderHeight())),x=rect.left+projected.x*rect.width/engine.getRenderWidth(),y=rect.top+projected.y*rect.height/engine.getRenderHeight();const insideCanvas=Number.isFinite(x)&&Number.isFinite(y)&&x>rect.left&&x<rect.left+rect.width&&y>rect.top&&y<rect.top+rect.height;const hit=insideCanvas?scene.pick(x-rect.left,y-rect.top):null,hitNames=[];for(let node=hit?.pickedMesh;node;node=node.parent)hitNames.push(node.name);return {name,floor:floorForTarget(name).name,x,y,z:projected.z,insideCanvas,hitNames,camera:coordinates(camera().position),target:coordinates(p),canvas:{left:rect.left,top:rect.top,width:rect.width,height:rect.height}}}
+ async function focus(name){const floor=floorForTarget(name);target(name);camera().position.set(3.85,floor.eye,floor.landingZ);camera().setTarget(new Vector3(3.85,floor.eye,floor.landingZ-1));clearInput();await frames('landing '+floor.name,()=>Math.abs(camera().position.y-floor.eye)<.03);const p=target(name).getBoundingInfo().boundingBox.centerWorld.clone();camera().position.set(p.x,floor.eye,p.z+.8);camera().setTarget(p);clearInput();await frames('focus '+name,()=>Math.abs(camera().position.y-floor.eye)<.03);return project(name)}
+ return {focus,project};
+}

@@ -1,6 +1,23 @@
 import './main.js';
 import {EngineStore,Vector3,Matrix} from '@babylonjs/core';
 import {installGraphics} from './reference-graphics.js';
-const getScene=()=>EngineStore.LastCreatedScene;if(getScene())installGraphics(getScene());
-let capturePaused=false;
-if(new URLSearchParams(location.search).get('test')==='1')window.__referenceTest={ready(){return !!getScene()?.metadata?.referenceGraphicsReady},pauseCapture(){const s=getScene();if(!s)return false;if(!capturePaused){s.getEngine().stopRenderLoop();capturePaused=true}return true},resumeCapture(){if(capturePaused){capturePaused=false;const s=getScene();s.getEngine().runRenderLoop(()=>s.render())}},prepareBasement(){const c=getScene().activeCamera;c.position.set(3.85,1.65,-.299);c.cameraDirection.setAll(0);c.cameraRotation.setAll(0)},focus(name){const s=getScene(),m=s.getMeshByName(name);if(!m)throw Error('Mesh fehlt: '+name);m.computeWorldMatrix(true);const p=m.getBoundingInfo().boundingBox.centerWorld.clone(),c=s.activeCamera;c.position.set(p.x,1.65,p.z+.8);c.setTarget(p);c.cameraDirection.setAll(0);c.cameraRotation.setAll(0)},project(name){const s=getScene(),m=s.getMeshByName(name);m.computeWorldMatrix(true);const e=s.getEngine(),r=e.getRenderingCanvas().getBoundingClientRect(),p=Vector3.Project(m.getBoundingInfo().boundingBox.centerWorld,Matrix.Identity(),s.getTransformMatrix(),s.activeCamera.viewport.toGlobal(e.getRenderWidth(),e.getRenderHeight()));return {x:r.left+p.x*r.width/e.getRenderWidth(),y:r.top+p.y*r.height/e.getRenderHeight()}},meshes(){return getScene().meshes.filter(m=>m.geometry).length}};
+import {createTestNavigation} from './reference-navigation.js';
+const getScene=()=>EngineStore.LastCreatedScene;
+const scene=getScene();let layoutReady=false;
+if(scene){
+ installGraphics(scene);
+ // Move the reference kitchen radiator out of the cabinet zone, in normal operation too.
+ const token=scene.onAfterRenderObservable.add(()=>{const parts=scene.meshes.filter(m=>m.name==='radiator:kitchen'||m.name.startsWith('radiator:kitchen:'));if(parts.length!==14)return;for(const mesh of parts){mesh.position.x+=2;mesh.computeWorldMatrix(true)}layoutReady=true;scene.onAfterRenderObservable.remove(token)});
+}
+if(new URLSearchParams(location.search).get('test')==='1'){
+ let capturePaused=false;
+ const navigation=createTestNavigation(getScene(),Vector3,Matrix);
+ window.__referenceTest={
+  ready(){return !!getScene()?.metadata?.referenceGraphicsReady&&layoutReady},
+  pauseCapture(){const s=getScene();if(!s)return false;if(!capturePaused){s.getEngine().stopRenderLoop();capturePaused=true}return true},
+  resumeCapture(){if(capturePaused){capturePaused=false;const s=getScene();s.getEngine().runRenderLoop(()=>s.render())}},
+  focus:navigation.focus,
+  project:navigation.project,
+  meshes(){return getScene().meshes.filter(m=>m.geometry).length}
+ };
+}
