@@ -1,0 +1,1 @@
+const {contextBridge,ipcRenderer}=require('electron');contextBridge.exposeInMainWorld('lb',{info:()=>ipcRenderer.invoke('info'),check:()=>ipcRenderer.invoke('check'),start:()=>ipcRenderer.send('start'),launcher:()=>ipcRenderer.send('launcher'),install:()=>ipcRenderer.send('install'),onStatus:f=>ipcRenderer.on('status',(e,t)=>f(t))});
