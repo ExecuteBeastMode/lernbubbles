@@ -1,0 +1,1 @@
+var D=document.createElement('div');D.id='mpDialog';D.innerHTML=`<div id='mpDialog'><h2>Test</h2><button id='mpClose'>Zurück</button></div>`;document.body.appendChild(D);
