@@ -1,0 +1,1 @@
+window.mpTest5=1;
