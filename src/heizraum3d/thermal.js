@@ -4,5 +4,5 @@ export class Thermal{
  step(dt){this.pause=Math.max(0,this.pause-dt);this.afterrun=Math.max(0,this.afterrun-dt);if(!this.device.water){this.burn=this.on;this.power=this.on?7:0;return}const opening=this.valves.reduce((a,b)=>a+b,0)/3,pump=!this.pumpFault&&(this.on||this.afterrun>0),mr=pump?opening*.33:0,mb=pump&&this.bypass?Math.max(0,.05-mr):0;this.flow=(mr+mb)*60;this.ret=mr+mb>0?(mr*this.tr+mb*this.tf)/(mr+mb):this.tr;this.qemit=.8*opening*Math.max(0,this.tr-20);const transfer=mr*4.18*(this.tf-this.tr),want=this.on&&!this.blocked&&this.pause===0;
  if(this.burn&&(!want||this.tf>=82||(!this.service&&this.tf>=this.set+3))){this.burn=false;this.pause=this.tf>=82?60:20;this.afterrun=120}if(!this.burn&&want&&this.tf<Math.min(78,this.set-3)){this.burn=true;this.starts++}this.power=this.burn?(this.service||!this.device.condensing?24:Math.min(24,Math.max(3,transfer+(this.set-this.tf)*.7))):0;const released=this.residual/20;this.residual+=dt*(.08*this.power-released);this.tf+=dt*(.92*this.power+released-transfer-.005*(this.tf-20))/this.capacity;this.tr+=dt*(transfer-this.qemit)/500;
  }
- stop(){this.on=false;this.burn=false;this.power=0;this.afterrun=120}
+ stop(){this.on=false;this.burn=false;this.service=false;this.power=0;this.afterrun=120}
 }
