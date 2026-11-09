@@ -1,0 +1,1 @@
+// entfernt Stunden-Fragen, Zeit-Eintraege und Stundenangaben nach dem Laden der Lern-App
