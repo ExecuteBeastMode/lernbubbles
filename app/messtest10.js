@@ -1,0 +1,1 @@
+var st=document.createElement('style');st.textContent='#mpChoice{position:fixed;inset:0;background:#0c1524}';document.head.appendChild(st);var D=document.createElement('div');D.id='mpDialog';D.innerHTML='<div id=mpWrap><button id=mpClose>Zurück</button><h2>Messpraxis</h2></div>';document.body.appendChild(D);
