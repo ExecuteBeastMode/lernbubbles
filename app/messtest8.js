@@ -1,0 +1,1 @@
+window.MPDATA={cases:[['MP-C','Öl',24,170,20,4,40,0,'passt',2]],kehr:['Kehrbesichtigung'],sketches:[['Test','<svg viewBox="0 0 400 260"><rect x="40" y="120" width="120" height="100" fill="#c9d6e4" stroke="#333"/></svg>',[['abstand','Abstandsfläche']]]]};
