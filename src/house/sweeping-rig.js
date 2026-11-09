@@ -1,0 +1,1 @@
+<3D-Kehrschornstein: Arbeitsplätze A/B/D, Dachleiter, Kehrbesen, Kehrleine, Spiegel, Taschenlampe, Rußdarstellung, Fehlerobjekte>

@@ -1,0 +1,1 @@
+<Kehrlogik: Auftrag, Zugang, Kehrweg A/B, Werkzeuge, Sichtkontrolle, Fortschritt, Rußentnahme an D, Abschluss, Messauftrag>
