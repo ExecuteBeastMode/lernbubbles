@@ -1,1 +1,57 @@
-{"name":"lernbubbles","productName":"Lernbubbles","version":"1.0.0","description":"Lernbubbles Schornsteinfeger-Handwerk","main":"house-main.js","author":"ExecuteBeastMode","license":"MIT","scripts":{"prestart":"npm run build:3d","start":"electron .","build:house":"node build/house.cjs","build:3d":"node build/heizraum3d.cjs && npm run build:house","dist":"npm run build:3d && electron-builder --win"},"dependencies":{"electron-updater":"^6.3.9"},"devDependencies":{"electron":"^33.2.0","electron-builder":"^25.1.8","@babylonjs/core":"9.35.0","@babylonjs/loaders":"9.35.0","esbuild":"^0.25.0"},"build":{"appId":"de.executebeastmode.lernbubbles","productName":"Lernbubbles","files":["house-main.js","desktop-main.js","offline-main.js","main.js","preload.js","launcher.html","app/**/*"],"win":{"target":"nsis"},"nsis":{"oneClick":false,"allowToChangeInstallationDirectory":true,"perMachine":false},"publish":[{"provider":"github","owner":"ExecuteBeastMode","repo":"lernbubbles","releaseType":"release"}]}}
+{
+  "name": "lernbubbles",
+  "productName": "Lernbubbles",
+  "version": "1.0.0",
+  "description": "Lernbubbles Schornsteinfeger-Handwerk",
+  "main": "house-main.js",
+  "author": "ExecuteBeastMode",
+  "license": "MIT",
+  "scripts": {
+    "prestart": "npm run build:3d",
+    "start": "electron .",
+    "build:house": "node build/house.cjs",
+    "build:3d": "node build/heizraum3d.cjs && npm run build:house",
+    "test:reference": "node tests/reference-render.cjs",
+    "dist": "npm run build:3d && electron-builder --win"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
+    "@babylonjs/core": "9.35.0",
+    "@babylonjs/loaders": "9.35.0",
+    "esbuild": "^0.25.0",
+    "playwright": "1.49.1"
+  },
+  "build": {
+    "appId": "de.executebeastmode.lernbubbles",
+    "productName": "Lernbubbles",
+    "files": [
+      "house-main.js",
+      "desktop-main.js",
+      "offline-main.js",
+      "main.js",
+      "preload.js",
+      "launcher.html",
+      "app/**/*"
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "ExecuteBeastMode",
+        "repo": "lernbubbles",
+        "releaseType": "release"
+      }
+    ]
+  }
+}

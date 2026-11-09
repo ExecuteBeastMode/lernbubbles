@@ -20,8 +20,19 @@ jobs:
         run: |
           npm install --no-save sharp png-to-ico@2.1.8
           node build/make-icon.js
-      - name: Offline-3D-Heizraum bauen
+      - name: Babylon-Simulationen bauen
         run: npm run build:3d
+      - name: Chromium installieren
+        run: npx playwright install chromium
+      - name: Echten Referenzablauf pruefen
+        run: npm run test:reference
+      - name: Echte Renderer-Screenshots sichern
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reference-room-${{ github.run_number }}
+          path: build/reference-screenshots/
+          if-no-files-found: warn
       - run: npx electron-builder --win --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
