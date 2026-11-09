@@ -223,6 +223,12 @@ const server = http.createServer((req, res) => {
     assert.match(await tx('#m-hint'), /Auftrag/, 'Weg ohne Auftrag muss abgelehnt werden');
 
     await prepareRouteA();
+
+    // Dachansicht: Die Kamera steht auf Standfläche A (7,335 m) und hat Augenhöhe darüber (1,65 m).
+    await page.waitForFunction(() => Math.abs(parseFloat(document.querySelector('#mission-ui').dataset.eyeY) - 8.985) < 0.05);
+    await shot('09a-roof-view');
+    checks.push('Weg A: Kamera steht auf der Höhe von Standfläche A (Dachansicht)');
+
     await press('#m-inspect');
     for (let i = 0; i < 4; i++) await press('#m-sweep');
     assert.match(await tx('#m-state'), /oben 100 %/);

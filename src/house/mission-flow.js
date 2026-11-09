@@ -107,6 +107,16 @@ export function installMissionFlow(scene, camera) {
     for (const mesh of roofMeshes()) mesh.setEnabled(!on);
   }
 
+  // Standhöhe: main.js legt die Kamerahöhe pro Frame auf Augenhöhe des Stockwerks fest. Wer an einer
+  // Standfläche arbeitet, steht aber auf deren Höhe. Diese Sperre überschreibt die Höhe nach main.js
+  // (der Beobachter ist später registriert) und endet beim Zurücksetzen, beim Betreten des Hauses,
+  // beim Wechsel an Standfläche D und beim Abschluss. Die aktuelle Höhe steht in data-eye-y.
+  let eyeLock = null;
+  const eyeObserver = scene.onBeforeRenderObservable.add(() => {
+    if (eyeLock !== null) camera.position.y = eyeLock;
+    ui.dataset.eyeY = camera.position.y.toFixed(3);
+  });
+
   function chooseRoute(route) {
     act(() => mission.route(route));
 
@@ -134,6 +144,7 @@ export function installMissionFlow(scene, camera) {
       approvedBrush: true
     });
 
+    eyeLock = null;
     setCutaway(false);
     rig.setDefect(scenario);
     rig.setLight(false);
@@ -200,9 +211,11 @@ export function installMissionFlow(scene, camera) {
     draw();
   }
 
-  function lookAt(position, offset) {
+  // Setzt die Kamera relativ zu einem Ziel. Mit lockY bleibt die Augenhöhe auf diesem Wert.
+  function lookAt(position, offset, lockY = null) {
     camera.position.copyFrom(position.add(offset));
     camera.setTarget(position);
+    eyeLock = lockY;
   }
 
   $('m-cat').onchange = () => {
@@ -243,6 +256,7 @@ export function installMissionFlow(scene, camera) {
     }
 
     stage = Math.min(2, stage + 1);
+    eyeLock = null;
 
     if (stage === 1) {
       camera.position.set(0, 1.65, 6.2);
@@ -264,7 +278,8 @@ export function installMissionFlow(scene, camera) {
     act(() => mission.inspectAccess());
 
     if (mission.state.access) {
-      lookAt(rig.anchors[mission.state.route], new Vector3(0, 0.8, 1.2));
+      const anchor = rig.anchors[mission.state.route];
+      lookAt(anchor, new Vector3(0, 1.65, 1.2), anchor.y + 1.65);
     }
   };
 
@@ -308,7 +323,10 @@ export function installMissionFlow(scene, camera) {
   $('m-finish').onclick = () => {
     act(() => mission.finish());
 
-    if (mission.state.complete) setCutaway(false);
+    if (mission.state.complete) {
+      eyeLock = null;
+      setCutaway(false);
+    }
   };
 
   $('m-measure').onclick = () => say(
@@ -338,6 +356,8 @@ export function installMissionFlow(scene, camera) {
     rig,
     get mission() { return mission; },
     dispose() {
+      eyeLock = null;
+      scene.onBeforeRenderObservable.remove(eyeObserver);
       setCutaway(false);
       rig.dispose();
       ui.remove();
