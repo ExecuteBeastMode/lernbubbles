@@ -1,0 +1,1 @@
+var D=document.createElement('div');D.id='t9';document.body.appendChild(D);
