@@ -1,0 +1,1 @@
+window.mpTest3=()=>1;
