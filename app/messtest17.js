@@ -1,0 +1,1 @@
+window.mpTest4=function(){var ch=document.createElement('div');ch.id='mpChoice';ch.innerHTML='<div id=mpChoiceInner><h2>Willkommen</h2></div>';document.body.appendChild(ch);ch.querySelector('#mpCP').onclick=function(){ch.remove();if(window.mpOpen)window.mpOpen()};ch.querySelector('#mpCT').onclick=function(){ch.remove()};};
